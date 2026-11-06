@@ -33,9 +33,52 @@
       flex-direction: column;
       align-items: center;
       border: 4px solid #ffeacb;
+      position: relative;
     }
 
-    /* 进度与状态 */
+    /* 声音激活遮罩层 */
+    #audio-mask {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 240, 220, 0.95);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    #audio-mask h2 {
+      color: #d14b4b;
+      font-size: 2rem;
+      margin-bottom: 20px;
+      animation: pulse 1.5s infinite;
+    }
+
+    #audio-mask button {
+      background: #ff9f43;
+      color: white;
+      border: none;
+      padding: 16px 40px;
+      font-size: 1.5rem;
+      border-radius: 50px;
+      font-weight: bold;
+      box-shadow: 0 8px 0 #cc7a2c;
+      cursor: pointer;
+    }
+    
+    #audio-mask button:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #cc7a2c;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
     .header-area {
       width: 100%;
       display: flex;
@@ -65,7 +108,6 @@
       box-shadow: inset 0 -2px 0 #b39a7e;
     }
 
-    /* 喇叭重听按钮 */
     .play-again-btn {
       background: #ffddb0;
       border-radius: 50px;
@@ -91,7 +133,6 @@
       font-size: 1.8rem;
     }
 
-    /* 6个字的网格 */
     .grid-container {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -101,12 +142,11 @@
       margin: 0 auto;
     }
 
-    /* 字卡按钮 */
     .char-btn {
       background: #ffffff;
       border: 4px solid #fbc28b;
       border-radius: 24px;
-      aspect-ratio: 1 / 1; /* 正方形卡片 */
+      aspect-ratio: 1 / 1;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -123,7 +163,6 @@
       box-shadow: 0 2px 0 #dba56b, 0 6px 12px rgba(0, 0, 0, 0.1);
     }
 
-    /* 正确动画 */
     @keyframes pop {
       0% { transform: scale(1); }
       50% { transform: scale(1.1); background: #c8f0c8; border-color: #73c973; }
@@ -136,7 +175,6 @@
       box-shadow: 0 4px 0 #5fa55f;
     }
 
-    /* 错误动画 */
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       25% { transform: translateX(-6px); }
@@ -159,132 +197,112 @@
       opacity: 0.6;
     }
 
-    /* 手机适配 */
     @media (max-width: 480px) {
-      .app-container {
-        padding: 16px 12px;
-      }
-      .grid-container {
-        gap: 10px;
-      }
-      .char-btn {
-        font-size: 2.8rem;
-        border-radius: 16px;
-      }
-      .play-again-btn {
-        font-size: 1rem;
-        padding: 10px 20px;
-      }
+      .app-container { padding: 16px 12px; }
+      .grid-container { gap: 10px; }
+      .char-btn { font-size: 2.8rem; border-radius: 16px; }
+      .play-again-btn { font-size: 1rem; padding: 10px 20px; }
     }
   </style>
 </head>
 <body>
+
+  <!-- 关键：声音激活遮罩层，必须点一下才能出声 -->
+  <div id="audio-mask">
+    <h2>👆 请点击下方按钮开启声音</h2>
+    <button id="start-btn">点击开始游戏</button>
+  </div>
+
   <div class="app-container">
     <div class="header-area">
       <div class="progress-badge" id="progressBadge">第 1 题</div>
       <div class="mode-indicator" id="modeIndicator">👂 听音找字</div>
     </div>
 
-    <!-- 核心：先出6个字，点这里重听发音 -->
     <div class="play-again-btn" id="playBtn">
       <span class="icon">🔊</span>
       <span>点我重听</span>
     </div>
 
-    <!-- 6个字网格 -->
-    <div class="grid-container" id="gridContainer">
-      <!-- JS动态生成 -->
-    </div>
+    <div class="grid-container" id="gridContainer"></div>
 
     <button class="reset-btn" id="resetBtn" aria-label="重新开始">🔄</button>
   </div>
 
   <script>
     (function() {
-      // ============================================================
-      // 【生字库】把你需要的字加在这里，格式 { text: '字' }
-      // ============================================================
+      // 生字库
       const GRADE_DATA = [
-        // 一年级示例（请按需补充）
         { text: '大' }, { text: '小' }, { text: '人' }, { text: '山' }, { text: '水' }, 
         { text: '火' }, { text: '日' }, { text: '月' }, { text: '口' }, { text: '手' }, 
         { text: '猫' }, { text: '狗' }, { text: '花' }, { text: '鸟' }, { text: '天' }, 
         { text: '上' }, { text: '下' }, { text: '我' }, { text: '你' }, { text: '好' },
-        { text: '太' }, { text: '早' }, { text: '牙' }, { text: '木' }, { text: '马' },
-        { text: '春' }, { text: '雨' }, { text: '芽' }, { text: '布' }, { text: '谷' },
-        
-        // 你可以继续往下加二三四五年级的字...
-        { text: '秋' }, { text: '烟' }, { text: '芦' }, { text: '夕' }, { text: '桥' },
-        { text: '周' }, { text: '排' }, { text: '洒' }, { text: '塔' }, { text: '墙' },
-        { text: '崇' }, { text: '浸' }, { text: '项' }, { text: '劳' }, { text: '涌' },
-        { text: '叨' }, { text: '姥' }, { text: '滋' }, { text: '纸' }, { text: '恍' }
+        { text: '太' }, { text: '早' }, { text: '牙' }, { text: '木' }, { text: '马' }
       ];
 
-      // 去除重复字并生成最终字库
       const uniqueMap = new Map();
       GRADE_DATA.forEach(item => uniqueMap.set(item.text, item));
       const wordPool = Array.from(uniqueMap.values());
 
-      // ============================================================
-      // 游戏状态
-      // ============================================================
-      let currentTargetWord = null; // 当前要求找的字
-      let currentGridWords = [];    // 当前屏幕上的6个字
+      let currentTargetWord = null;
+      let currentGridWords = [];
       let level = 1;
-      let isLocked = false;         // 防止连续点击
+      let isLocked = false;
+      let isAudioReady = false; // 声音是否已激活
 
-      // DOM 元素
       const gridContainer = document.getElementById('gridContainer');
       const playBtn = document.getElementById('playBtn');
       const progressBadge = document.getElementById('progressBadge');
       const resetBtn = document.getElementById('resetBtn');
-      const modeIndicator = document.getElementById('modeIndicator');
+      
+      const audioMask = document.getElementById('audio-mask');
+      const startBtn = document.getElementById('start-btn');
 
-      // ============================================================
-      // 语音朗读功能
-      // ============================================================
+      // 语音引擎核心逻辑
       function speak(text) {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
+        if (!isAudioReady) return;
+        if (!window.speechSynthesis) {
+          alert('您的浏览器不支持语音朗读，请使用 Chrome、Safari 或 Edge 浏览器打开。');
+          return;
+        }
+        
+        // 有些手机浏览器必须要在用户交互后且不打断的情况下才发声
+        window.speechSynthesis.cancel(); 
+        
+        const utterance = new SpeechSynthesisUtterance();
+        utterance.text = text;
         utterance.lang = 'zh-CN';
-        utterance.rate = 0.85; // 语速稍慢适合孩子
+        utterance.rate = 0.85; 
         utterance.pitch = 1.1;
         
-        // 尝试选择中文语音
         const voices = window.speechSynthesis.getVoices();
-        const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
-        if (zhVoice) utterance.voice = zhVoice;
+        // 尽量找中文语音
+        const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn') || v.name.includes('Chinese'));
+        if (zhVoice) {
+          utterance.voice = zhVoice;
+        }
         
         window.speechSynthesis.speak(utterance);
       }
 
-      // ============================================================
-      // 核心逻辑：生成新题目
-      // ============================================================
+      // 生成新题目
       function generateNewRound() {
         if (isLocked) return;
         
-        // 1. 随机抽取6个不同的字作为选项
-        // 打乱字库，取前6个
         const shuffledPool = [...wordPool].sort(() => Math.random() - 0.5);
         currentGridWords = shuffledPool.slice(0, 6);
         
-        // 2. 从这6个字里随机选一个作为“目标发音字”
         const randomIndex = Math.floor(Math.random() * 6);
         currentTargetWord = currentGridWords[randomIndex];
 
-        // 3. 更新UI
         renderGrid();
         progressBadge.textContent = `第 ${level} 题`;
         
-        // 4. 自动朗读目标字 (延迟一点点，等UI渲染完)
         setTimeout(() => {
           speak(currentTargetWord.text);
         }, 300);
       }
 
-      // 渲染6个字的网格
       function renderGrid() {
         gridContainer.innerHTML = '';
         currentGridWords.forEach(wordObj => {
@@ -292,64 +310,44 @@
           btn.classList.add('char-btn');
           btn.textContent = wordObj.text;
           
-          // 点击事件
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
             handleCardClick(wordObj.text, btn);
           });
-
           gridContainer.appendChild(btn);
         });
       }
 
-      // ============================================================
-      // 处理点击卡片
-      // ============================================================
       function handleCardClick(clickedText, btnElement) {
         if (isLocked) return;
 
         if (clickedText === currentTargetWord.text) {
-          // 答对了
           isLocked = true;
           btnElement.classList.add('correct');
-          // 答对也可以再读一遍加深印象
           speak(clickedText);
           
-          // 延迟后进入下一题
           setTimeout(() => {
             level++;
             isLocked = false;
-            // 清除所有卡片的动画
             document.querySelectorAll('.char-btn').forEach(b => {
               b.classList.remove('correct', 'wrong');
             });
             generateNewRound();
           }, 1000);
         } else {
-          // 答错了
           btnElement.classList.add('wrong');
           if (navigator.vibrate) navigator.vibrate(200);
-          
-          // 震动的动画结束后移除类名
           setTimeout(() => {
             btnElement.classList.remove('wrong');
           }, 400);
         }
       }
 
-      // ============================================================
-      // 重听按钮逻辑
-      // ============================================================
       playBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentTargetWord) {
-          speak(currentTargetWord.text);
-        }
+        if (currentTargetWord) speak(currentTargetWord.text);
       });
 
-      // ============================================================
-      // 重置游戏
-      // ============================================================
       function resetGame() {
         level = 1;
         isLocked = false;
@@ -362,21 +360,35 @@
         resetGame();
       });
 
-      // 初始化首次点击加载语音包
-      document.body.addEventListener('touchstart', function once() {
-        if (window.speechSynthesis) window.speechSynthesis.getVoices();
-        document.body.removeEventListener('touchstart', once);
-      }, { once: true });
-      document.body.addEventListener('click', function once() {
-        if (window.speechSynthesis) window.speechSynthesis.getVoices();
-        document.body.removeEventListener('click', once);
-      }, { once: true });
+      // ============================================================
+      // 核心突破：点击开始按钮，强行激活手机的声音权限
+      // ============================================================
+      startBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        // 1. 预加载语音列表
+        if (window.speechSynthesis) {
+          window.speechSynthesis.getVoices();
+          // 2. 随便播报一个空字符或很短的声音，把手机的音频通道“骗”开
+          const u = new SpeechSynthesisUtterance(' ');
+          u.volume = 0.1; 
+          window.speechSynthesis.speak(u);
+        }
 
-      // ============================================================
-      // 启动游戏
-      // ============================================================
-      // 初始化第一题（注意：部分浏览器限制自动播放，可能需要用户点一下屏幕才会朗读）
-      generateNewRound();
+        // 3. 标记声音已准备
+        isAudioReady = true;
+
+        // 4. 隐藏遮罩层，开始游戏
+        audioMask.style.display = 'none';
+        generateNewRound();
+      });
+
+      // 初始化语音列表加载
+      if (window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = () => {
+          // 语音包加载完成
+        };
+      }
 
     })();
   </script>
