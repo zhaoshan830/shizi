@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -9,7 +9,7 @@
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
-      font-family: 'Comic Sans MS', 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      font-family: 'Comic Sans MS', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     }
 
     body {
@@ -26,7 +26,7 @@
       width: 100%;
       max-width: 700px;
       background: #fffef7;
-      border-radius: 56px;
+      border-radius: 40px;
       box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
       padding: 24px 20px 32px;
       display: flex;
@@ -35,14 +35,14 @@
       border: 4px solid #ffeacb;
     }
 
-    /* 进度条区域 */
-    .progress-area {
+    /* 进度与状态 */
+    .header-area {
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 10px;
-      padding: 0 6px;
+      margin-bottom: 20px;
+      padding: 0 10px;
     }
 
     .progress-badge {
@@ -55,988 +55,314 @@
       box-shadow: inset 0 -3px 0 #b46f3a;
     }
 
-    .star-display {
-      display: flex;
-      gap: 6px;
-      font-size: 1.8rem;
-      line-height: 1;
-      color: #ffb347;
-      text-shadow: 0 2px 0 #b46f3a;
+    .mode-indicator {
+      background: #e3d1bd;
+      padding: 6px 16px;
+      border-radius: 30px;
+      color: #4b3621;
+      font-size: 1rem;
+      font-weight: bold;
+      box-shadow: inset 0 -2px 0 #b39a7e;
     }
 
-    /* 中央主卡片 */
-    .card {
-      background: #fff6e6;
-      border-radius: 80px;
-      padding: 24px 16px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      border: 3px dashed #ffc489;
-      margin: 8px 0 16px;
-    }
-
-    /* 大字展示 */
-    .character-show {
-      font-size: 6.5rem;
-      line-height: 1.3;
-      font-weight: 700;
-      color: #4b2e1e;
-      text-shadow: 6px 6px 0 #ffe1b5, 2px 2px 0 #d9b382;
-      letter-spacing: 6px;
-      margin: 10px 0 16px;
-      min-height: 140px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      word-break: break-word;
-      text-align: center;
-      padding: 0 10px;
-    }
-
-    /* 句子稍微小一点 */
-    .character-show.sentence {
-      font-size: 3.2rem;
-      line-height: 1.4;
-      letter-spacing: 2px;
-    }
-
-    /* 喇叭 / 发音提示 */
-    .sound-hint {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
+    /* 喇叭重听按钮 */
+    .play-again-btn {
       background: #ffddb0;
       border-radius: 50px;
-      padding: 8px 24px;
-      margin: 6px 0 10px;
+      padding: 12px 30px;
+      margin-bottom: 24px;
       color: #573f2e;
       font-weight: bold;
       font-size: 1.2rem;
-      box-shadow: 0 4px 0 #c29b6b;
+      box-shadow: 0 6px 0 #c29b6b;
+      transition: all 0.1s;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .play-again-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 0 0 #c29b6b;
+    }
+
+    .play-again-btn .icon {
+      font-size: 1.8rem;
+    }
+
+    /* 6个字的网格 */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* 字卡按钮 */
+    .char-btn {
+      background: #ffffff;
+      border: 4px solid #fbc28b;
+      border-radius: 24px;
+      aspect-ratio: 1 / 1; /* 正方形卡片 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.5rem;
+      font-weight: 700;
+      color: #3f2a18;
+      box-shadow: 0 8px 0 #dba56b, 0 6px 12px rgba(0, 0, 0, 0.1);
       transition: all 0.1s;
       cursor: pointer;
     }
 
-    .sound-hint:active {
-      transform: translateY(3px);
-      box-shadow: 0 1px 0 #c29b6b;
+    .char-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #dba56b, 0 6px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .sound-hint .icon {
-      font-size: 2rem;
+    /* 正确动画 */
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); background: #c8f0c8; border-color: #73c973; }
+      100% { transform: scale(1); }
+    }
+    .char-btn.correct {
+      animation: pop 0.4s;
+      background: #e6ffe6;
+      border-color: #73c973;
+      box-shadow: 0 4px 0 #5fa55f;
     }
 
-    /* 选项区 */
-    .options-grid {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 14px;
-      width: 100%;
-      margin-top: 10px;
-      padding: 0 6px;
+    /* 错误动画 */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+    .char-btn.wrong {
+      animation: shake 0.3s;
+      background: #ffe6e6;
+      border-color: #ff7a7a;
+      box-shadow: 0 4px 0 #d14b4b;
     }
 
-    .option-btn {
-      background: #ffffff;
-      border: 4px solid #fbc28b;
-      border-radius: 40px;
-      padding: 12px 0;
-      flex: 1 1 100px;
-      min-width: 100px;
-      font-size: 2.8rem;
-      font-weight: 700;
-      color: #3f2a18;
-      text-align: center;
-      box-shadow: 0 8px 0 #dba56b, 0 6px 12px rgba(0, 0, 0, 0.1);
-      transition: all 0.08s;
-      cursor: pointer;
-      line-height: 1.3;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .option-btn:active {
-      transform: translateY(5px);
-      box-shadow: 0 3px 0 #dba56b, 0 6px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    /* 复习模式下的按钮样式 (点击不自动发音, 但视觉上略有区分) */
-    .option-btn.review-mode {
-      border-color: #b0d4b0;
-      box-shadow: 0 8px 0 #93b893, 0 6px 12px rgba(0, 0, 0, 0.1);
-      background: #f9fff9;
-    }
-
-    .option-btn.review-mode:active {
-      box-shadow: 0 3px 0 #93b893, 0 6px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    /* 状态条 */
-    .status-bar {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      margin-top: 16px;
-      padding: 0 8px;
-      font-size: 1rem;
-      color: #7a5a3a;
-      font-weight: bold;
-    }
-
-    .mode-indicator {
-      background: #e3d1bd;
-      padding: 6px 20px;
-      border-radius: 30px;
-      color: #4b3621;
-      font-size: 1.1rem;
-      box-shadow: inset 0 -2px 0 #b39a7e;
-    }
-
-    /* 重置按钮 */
     .reset-btn {
+      margin-top: 30px;
       background: none;
       border: none;
-      font-size: 1.8rem;
-      padding: 8px 16px;
+      font-size: 2rem;
+      padding: 10px;
       cursor: pointer;
-      opacity: 0.7;
-      transition: 0.1s;
+      opacity: 0.6;
     }
 
-    .reset-btn:active {
-      transform: scale(0.92);
-    }
-
-    /* 小屏幕适配 */
+    /* 手机适配 */
     @media (max-width: 480px) {
       .app-container {
-        padding: 16px 12px 24px;
-        border-radius: 40px;
+        padding: 16px 12px;
       }
-
-      .character-show {
-        font-size: 4.8rem;
-        min-height: 110px;
-        text-shadow: 4px 4px 0 #ffe1b5, 2px 2px 0 #d9b382;
+      .grid-container {
+        gap: 10px;
       }
-
-      .character-show.sentence {
-        font-size: 2.4rem;
+      .char-btn {
+        font-size: 2.8rem;
+        border-radius: 16px;
       }
-
-      .option-btn {
-        font-size: 2.2rem;
-        padding: 8px 0;
-        min-width: 80px;
-        border-radius: 30px;
-      }
-
-      .sound-hint {
+      .play-again-btn {
         font-size: 1rem;
-        padding: 6px 18px;
-      }
-
-      .sound-hint .icon {
-        font-size: 1.6rem;
-      }
-
-      .progress-badge {
-        font-size: 0.9rem;
-        padding: 4px 14px;
-      }
-
-      .star-display {
-        font-size: 1.4rem;
-      }
-    }
-
-    @media (min-width: 800px) {
-      .character-show {
-        font-size: 8rem;
-      }
-      .character-show.sentence {
-        font-size: 4rem;
+        padding: 10px 20px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="app-container" id="app">
-    <!-- 进度 & 星星 -->
-    <div class="progress-area">
-      <div class="progress-badge" id="progressBadge">第 1 关</div>
-      <div class="star-display" id="starDisplay">⭐️</div>
+  <div class="app-container">
+    <div class="header-area">
+      <div class="progress-badge" id="progressBadge">第 1 题</div>
+      <div class="mode-indicator" id="modeIndicator">👂 听音找字</div>
     </div>
 
-    <!-- 主卡片 -->
-    <div class="card">
-      <div class="character-show" id="characterShow">大</div>
-      <!-- 喇叭区域，点击重读当前字/句 -->
-      <div class="sound-hint" id="soundHint">
-        <span class="icon">🔊</span>
-        <span>点我听一听</span>
-      </div>
+    <!-- 核心：先出6个字，点这里重听发音 -->
+    <div class="play-again-btn" id="playBtn">
+      <span class="icon">🔊</span>
+      <span>点我重听</span>
     </div>
 
-    <!-- 选项按钮区域 -->
-    <div class="options-grid" id="optionsGrid">
-      <!-- 动态生成 -->
+    <!-- 6个字网格 -->
+    <div class="grid-container" id="gridContainer">
+      <!-- JS动态生成 -->
     </div>
 
-    <!-- 底部状态条 -->
-    <div class="status-bar">
-      <span class="mode-indicator" id="modeIndicator">🔊 听音选字</span>
-      <button class="reset-btn" id="resetBtn" aria-label="重新开始">🔄</button>
-    </div>
+    <button class="reset-btn" id="resetBtn" aria-label="重新开始">🔄</button>
   </div>
 
   <script>
     (function() {
-      // ---------- 学习库：简单字和句子，适合4-5岁 ----------
-      const learningData = [
-        { text: '大', type: 'char' },
-        { text: '小', type: 'char' },
-        { text: '人', type: 'char' },
-        { text: '山', type: 'char' },
-        { text: '水', type: 'char' },
-        { text: '火', type: 'char' },
-        { text: '日', type: 'char' },
-        { text: '月', type: 'char' },
-        { text: '口', type: 'char' },
-        { text: '手', type: 'char' },
-        { text: '猫', type: 'char' },
-        { text: '狗', type: 'char' },
-        { text: '花', type: 'char' },
-        { text: '鸟', type: 'char' },
-        { text: '天', type: 'char' },
-        { text: '上', type: 'char' },
-        { text: '我', type: 'char' },
-        { text: '你', type: 'char' },
-        { text: '好', type: 'char' },
-        { text: '大 小', type: 'sentence' },   // 两个字的“句子”
-        { text: '太 阳', type: 'sentence' },
-        { text: '月 亮', type: 'sentence' },
-        { text: '小 猫', type: 'sentence' },
-        { text: '我 爱 你', type: 'sentence' },
-        { text: '一 二 三', type: 'sentence' },
+      // ============================================================
+      // 【生字库】把你需要的字加在这里，格式 { text: '字' }
+      // ============================================================
+      const GRADE_DATA = [
+        // 一年级示例（请按需补充）
+        { text: '大' }, { text: '小' }, { text: '人' }, { text: '山' }, { text: '水' }, 
+        { text: '火' }, { text: '日' }, { text: '月' }, { text: '口' }, { text: '手' }, 
+        { text: '猫' }, { text: '狗' }, { text: '花' }, { text: '鸟' }, { text: '天' }, 
+        { text: '上' }, { text: '下' }, { text: '我' }, { text: '你' }, { text: '好' },
+        { text: '太' }, { text: '早' }, { text: '牙' }, { text: '木' }, { text: '马' },
+        { text: '春' }, { text: '雨' }, { text: '芽' }, { text: '布' }, { text: '谷' },
+        
+        // 你可以继续往下加二三四五年级的字...
+        { text: '秋' }, { text: '烟' }, { text: '芦' }, { text: '夕' }, { text: '桥' },
+        { text: '周' }, { text: '排' }, { text: '洒' }, { text: '塔' }, { text: '墙' },
+        { text: '崇' }, { text: '浸' }, { text: '项' }, { text: '劳' }, { text: '涌' },
+        { text: '叨' }, { text: '姥' }, { text: '滋' }, { text: '纸' }, { text: '恍' }
       ];
 
-      // 抽取一部分作为每次闯关的候选 (保证有足够选项)
-      // 为了简单，所有字都可用于干扰项，但排除当前字
+      // 去除重复字并生成最终字库
+      const uniqueMap = new Map();
+      GRADE_DATA.forEach(item => uniqueMap.set(item.text, item));
+      const wordPool = Array.from(uniqueMap.values());
 
-      // ---------- 游戏状态 ----------
-      let currentItem = null;            // 当前展示的项目 { text, type }
-      let currentOptions = [];           // 当前选项按钮文字列表
-      let isReviewMode = false;          // 是否处于复习模式（点击选项不自动读）
-      let learnedItems = [];             // 已学过的项目 (按顺序)
-      let reviewPool = [];               // 复习池：当学完几个之后，从这里随机抽取
-      let currentLevel = 1;              // 已正确通关次数
-      let reviewCounter = 0;             // 用于控制复习模式出现的频率
-
-      // 当前进度：学习模式连续正确几个后进入复习
-      const LEARN_BEFORE_REVIEW = 3;     // 每学3个新字，进入一次复习
+      // ============================================================
+      // 游戏状态
+      // ============================================================
+      let currentTargetWord = null; // 当前要求找的字
+      let currentGridWords = [];    // 当前屏幕上的6个字
+      let level = 1;
+      let isLocked = false;         // 防止连续点击
 
       // DOM 元素
-      const characterShow = document.getElementById('characterShow');
-      const soundHint = document.getElementById('soundHint');
-      const optionsGrid = document.getElementById('optionsGrid');
+      const gridContainer = document.getElementById('gridContainer');
+      const playBtn = document.getElementById('playBtn');
       const progressBadge = document.getElementById('progressBadge');
-      const starDisplay = document.getElementById('starDisplay');
-      const modeIndicator = document.getElementById('modeIndicator');
       const resetBtn = document.getElementById('resetBtn');
+      const modeIndicator = document.getElementById('modeIndicator');
 
-      // ---------- 工具函数 ----------
-      // 随机打乱数组
-      function shuffleArray(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-      }
-
-      // 从数组中随机选一个元素
-      function randomItem(arr) {
-        return arr[Math.floor(Math.random() * arr.length)];
-      }
-
-      // 语音合成朗读文本 (使用Web Speech API)
-      function speakText(text, interrupt = true) {
+      // ============================================================
+      // 语音朗读功能
+      // ============================================================
+      function speak(text) {
         if (!window.speechSynthesis) return;
-        // 停止任何正在播放的语音
-        if (interrupt) {
-          window.speechSynthesis.cancel();
-        }
+        window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
-        // 设置中文语音
         utterance.lang = 'zh-CN';
-        utterance.rate = 0.9;      // 稍慢，适合孩子
-        utterance.pitch = 1.2;     // 音调稍高，可爱
-        utterance.volume = 1;
-        // 如果有中文语音，选择一个
+        utterance.rate = 0.85; // 语速稍慢适合孩子
+        utterance.pitch = 1.1;
+        
+        // 尝试选择中文语音
         const voices = window.speechSynthesis.getVoices();
         const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
         if (zhVoice) utterance.voice = zhVoice;
+        
         window.speechSynthesis.speak(utterance);
       }
 
-      // 预加载语音 (某些浏览器需要用户触发后才会加载)
-      function initVoices() {
-        if (window.speechSynthesis) {
-          window.speechSynthesis.getVoices();
-        }
-      }
-      // 用户首次点击时激活语音
-      document.body.addEventListener('touchstart', function once() {
-        initVoices();
-        document.body.removeEventListener('touchstart', once);
-      }, { once: true });
-      document.body.addEventListener('click', function once() {
-        initVoices();
-        document.body.removeEventListener('click', once);
-      }, { once: true });
+      // ============================================================
+      // 核心逻辑：生成新题目
+      // ============================================================
+      function generateNewRound() {
+        if (isLocked) return;
+        
+        // 1. 随机抽取6个不同的字作为选项
+        // 打乱字库，取前6个
+        const shuffledPool = [...wordPool].sort(() => Math.random() - 0.5);
+        currentGridWords = shuffledPool.slice(0, 6);
+        
+        // 2. 从这6个字里随机选一个作为“目标发音字”
+        const randomIndex = Math.floor(Math.random() * 6);
+        currentTargetWord = currentGridWords[randomIndex];
 
-      // ---------- 生成干扰项 ----------
-      function generateOptionsForItem(item) {
-        const correctText = item.text;
-        // 获取所有不同于 correctText 的项目
-        const otherItems = learningData.filter(d => d.text !== correctText);
-        // 从里面随机取最多3个作为干扰项 (如果是句子，选句子或字都可以，为了趣味)
-        // 但为了难度适中，对于句子，干扰项也随机
-        const shuffled = shuffleArray([...otherItems]);
-        const distractors = shuffled.slice(0, 3).map(d => d.text);
-
-        // 选项列表 = 正确 + 3干扰，然后打乱
-        let options = [correctText, ...distractors];
-        // 如果干扰项不足3个（极少情况）填充
-        while (options.length < 4) {
-          const extra = randomItem(learningData).text;
-          if (!options.includes(extra)) options.push(extra);
-        }
-        // 打乱选项顺序
-        return shuffleArray(options);
+        // 3. 更新UI
+        renderGrid();
+        progressBadge.textContent = `第 ${level} 题`;
+        
+        // 4. 自动朗读目标字 (延迟一点点，等UI渲染完)
+        setTimeout(() => {
+          speak(currentTargetWord.text);
+        }, 300);
       }
 
-      // ---------- 更新界面 (显示当前项目、选项、模式) ----------
-      function renderGame() {
-        // 1. 显示当前文字/句子
-        if (!currentItem) return;
-        characterShow.textContent = currentItem.text;
-        // 句子类型加粗加大？通过 class 控制
-        if (currentItem.type === 'sentence') {
-          characterShow.classList.add('sentence');
-        } else {
-          characterShow.classList.remove('sentence');
-        }
-
-        // 2. 渲染选项
-        optionsGrid.innerHTML = '';
-        currentOptions.forEach(optText => {
+      // 渲染6个字的网格
+      function renderGrid() {
+        gridContainer.innerHTML = '';
+        currentGridWords.forEach(wordObj => {
           const btn = document.createElement('div');
-          btn.classList.add('option-btn');
-          if (isReviewMode) btn.classList.add('review-mode'); // 复习模式样式
-          btn.textContent = optText;
-          btn.dataset.text = optText;
-
+          btn.classList.add('char-btn');
+          btn.textContent = wordObj.text;
+          
           // 点击事件
           btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            handleOptionClick(optText, btn);
+            handleCardClick(wordObj.text, btn);
           });
 
-          optionsGrid.appendChild(btn);
+          gridContainer.appendChild(btn);
         });
-
-        // 3. 更新模式提示
-        modeIndicator.textContent = isReviewMode ? '📖 复习认字 (点字不读)' : '🔊 听音选字';
-        // 复习模式下，喇叭也可以点，但依然会读（方便孩子忘记时听）
-        // 但根据需求“后面随机出来让孩子认的，点就不读，让孩子自己学认字”，
-        // 这里的意思应该是选项点击不自动读，但喇叭可以主动求助读。
-        // 所以复习模式，选项不读；喇叭点击仍然可以读。
-
-        // 4. 更新进度星星
-        updateProgressStars();
-
-        // 5. 学习模式下自动朗读当前字（因为孩子需要听）
-        if (!isReviewMode) {
-          // 为了确保语音在用户交互后播放，稍作延迟
-          setTimeout(() => {
-            speakText(currentItem.text);
-          }, 100);
-        } else {
-          // 复习模式不自动读
-        }
       }
 
-      // 更新进度徽章 & 星星
-      function updateProgressStars() {
-        progressBadge.textContent = `第 ${currentLevel} 关`;
-        // 星星根据学习进度显示，简单显示几个
-        let stars = '';
-        const starCount = Math.min(5, Math.floor(currentLevel / 2) + 1);
-        for (let i = 0; i < starCount; i++) stars += '⭐️';
-        if (starCount === 0) stars = '⭐️';
-        starDisplay.textContent = stars;
-      }
+      // ============================================================
+      // 处理点击卡片
+      // ============================================================
+      function handleCardClick(clickedText, btnElement) {
+        if (isLocked) return;
 
-      // ---------- 处理选项点击 ----------
-      function handleOptionClick(selectedText, btnElement) {
-        if (!currentItem) return;
-
-        const isCorrect = (selectedText === currentItem.text);
-
-        // 复习模式下：点击选项，不朗读 (严格遵循需求)
-        // 学习模式下：点击选项，朗读选中的字 (如果点错了也读一下，让孩子知道点的是什么？但会干扰？但我们按照需求：学习模式点对了自动下一个，点错了应该提示)
-        // 需求：“点对了自动跳到下一个字，过了几个字之后再随机出来前面几个字，不认识，点一个读一下，但是后面随机出来让孩子认的，点就不读”
-        // 解释：学习模式（新字）时，点选项（无论对错）应该读一下这个选项，帮助孩子？ 但点错了可能不好。但为了体验，我们决定学习模式下点选项也读一下（因为孩子可能想听）
-        // 但点对了自动跳下一个。我们可以在学习模式下点击选项就朗读该选项；复习模式点击选项不朗读。
-
-        if (!isReviewMode) {
-          // 学习模式：点击选项朗读其文字 (包括错误选项，让孩子听到发音)
-          speakText(selectedText, true);
-        }
-
-        if (isCorrect) {
-          // 正确！
-          // 禁用所有按钮防止重复点击
-          setOptionsEnabled(false);
-
-          // 如果是学习模式，将当前项目加入已学列表和复习池
-          if (!isReviewMode) {
-            // 检查是否已经学过(避免重复添加，但一般不会)
-            if (!learnedItems.some(item => item.text === currentItem.text)) {
-              learnedItems.push(currentItem);
-              // 同时加入复习池
-              reviewPool.push(currentItem);
-            }
-          }
-
-          // 增加关卡计数
-          currentLevel++;
-
-          // 短暂延迟后进入下一题
+        if (clickedText === currentTargetWord.text) {
+          // 答对了
+          isLocked = true;
+          btnElement.classList.add('correct');
+          // 答对也可以再读一遍加深印象
+          speak(clickedText);
+          
+          // 延迟后进入下一题
           setTimeout(() => {
-            // 决定下一题是学习模式还是复习模式
-            // 根据已学数量和学习计数决定
-            // 规则：每学习 LEARN_BEFORE_REVIEW 个新字（learnedItems增长），且复习池不为空，则进入复习模式
-            // 但也要避免连续复习。使用一个简单计数器
-            // 如果当前不是复习模式，并且已学数量是 LEARN_BEFORE_REVIEW 的倍数，且复习池有内容，则切换到复习模式
-            // 注意：learnedItems 是在正确后push，所以判断时应使用已学数量
-            const learnedCount = learnedItems.length;
-            // 如果刚刚达到阈值，并且复习池有内容，进入复习模式
-            if (!isReviewMode && learnedCount > 0 && learnedCount % LEARN_BEFORE_REVIEW === 0 && reviewPool.length > 0) {
-              // 进入复习模式
-              isReviewMode = true;
-              // 从复习池随机选一个
-              const reviewItem = randomItem(reviewPool);
-              // 但复习池可能包含刚学的，也可能包含之前的，这没问题
-              currentItem = reviewItem;
-              // 生成选项 (复习模式下，选项从所有学习数据随机抽取? 但为了难度，可以包含正确项和干扰项)
-              currentOptions = generateOptionsForItem(currentItem);
-              // 渲染
-              renderGame();
-              // 复习模式不朗读，但已经通过renderGame判断不读了
-            } else {
-              // 否则是学习模式
-              // 但如果当前是复习模式且答对了，需要决定下一步：可能继续复习或者回到学习
-              if (isReviewMode) {
-                // 复习模式下答对，有几率继续复习，也有几率回到学习
-                // 复习模式答对后，我们让复习池移除该项目? 不，复习池保持不变，但可以避免重复？
-                // 简单点：如果复习模式下答对，有50%概率继续复习，50%概率回到学习
-                // 但为了让孩子多学新字，复习模式最多连续两次，我们用计数器控制
-                // 简化：复习模式下答对后，强制切换到学习模式（除非复习池只剩一个?）
-                // 但需求是“过了几个字之后再随机出来前面几个字”，所以复习穿插进行。我们设计：复习模式答对后，回到学习模式。
-                // 并且清空复习计数器？
-                // 为了更有趣，如果复习池比较大，可以再复习一个。但为了不让孩子觉得枯燥，就回到学习。
-                // 我们再加一个随机：30%概率继续复习
-                // 但注意：如果继续复习，我们依然不读。
-                // 实现：用随机数
-                const continueReview = Math.random() < 0.3 && reviewPool.length > 1; 
-                if (continueReview) {
-                  // 继续复习模式：从复习池随机选另一个（排除当前已经答对的？也可以不排除，但为了避免连续相同，排除当前）
-                  const otherReviews = reviewPool.filter(item => item.text !== currentItem.text);
-                  if (otherReviews.length > 0) {
-                    isReviewMode = true;
-                    currentItem = randomItem(otherReviews);
-                    currentOptions = generateOptionsForItem(currentItem);
-                    renderGame();
-                    return;
-                  }
-                }
-                // 否则回到学习模式
-                isReviewMode = false;
-              }
-
-              // 学习模式：从 learningData 中选一个没学过的? 但也可以复习之前学过的，但为了推进，尽量选新的
-              // 获取所有学习库中还没学过的项
-              const allTexts = learningData.map(d => d.text);
-              const learnedTexts = learnedItems.map(d => d.text);
-              const unlearned = learningData.filter(d => !learnedTexts.includes(d.text));
-
-              if (unlearned.length > 0) {
-                // 优先选没学过的
-                currentItem = randomItem(unlearned);
-              } else {
-                // 如果所有都学过了，就随机选一个已学过的作为新学习？但这种情况很少，因为学习库有25项
-                // 可以重新开始，或者随机选一个
-                currentItem = randomItem(learningData);
-              }
-
-              // 生成选项
-              currentOptions = generateOptionsForItem(currentItem);
-              // 重新渲染
-              renderGame();
-            }
-          }, 500); // 延迟500ms，让孩子看到反馈
+            level++;
+            isLocked = false;
+            // 清除所有卡片的动画
+            document.querySelectorAll('.char-btn').forEach(b => {
+              b.classList.remove('correct', 'wrong');
+            });
+            generateNewRound();
+          }, 1000);
         } else {
-          // 选错了
-          // 震动反馈 (如果支持)
+          // 答错了
+          btnElement.classList.add('wrong');
           if (navigator.vibrate) navigator.vibrate(200);
-          // 学习模式下，点击错误按钮朗读了它的发音(已在上面处理)，可以再提示“再试试”
-          // 简单闪烁错误按钮
-          btnElement.style.transform = 'translateY(5px)';
-          btnElement.style.boxShadow = '0 3px 0 #dba56b, 0 6px 12px rgba(0, 0, 0, 0.1)';
+          
+          // 震动的动画结束后移除类名
           setTimeout(() => {
-            btnElement.style.transform = '';
-            btnElement.style.boxShadow = '';
-          }, 150);
-          // 不做其他
+            btnElement.classList.remove('wrong');
+          }, 400);
         }
       }
 
-      // 设置选项按钮是否可点击
-      function setOptionsEnabled(enabled) {
-        const btns = document.querySelectorAll('.option-btn');
-        btns.forEach(btn => {
-          btn.style.pointerEvents = enabled ? 'auto' : 'none';
-          btn.style.opacity = enabled ? '1' : '0.7';
-        });
-      }
-
-      // ---------- 开始新游戏 / 重置 ----------
-      function resetGame() {
-        // 重置状态
-        learnedItems = [];
-        reviewPool = [];
-        currentLevel = 1;
-        isReviewMode = false;
-
-        // 从 learningData 随机选一个作为起点
-        currentItem = randomItem(learningData);
-        currentOptions = generateOptionsForItem(currentItem);
-
-        // 渲染
-        renderGame();
-        // 确保按钮可点
-        setOptionsEnabled(true);
-
-        // 停止语音
-        if (window.speechSynthesis) window.speechSynthesis.cancel();
-      }
-
-      // ---------- 事件绑定 ----------
-      // 喇叭点击：重读当前字/句 (无论学习还是复习模式，主动点击都读)
-      soundHint.addEventListener('click', (e) => {
+      // ============================================================
+      // 重听按钮逻辑
+      // ============================================================
+      playBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (currentItem) {
-          speakText(currentItem.text, true);
+        if (currentTargetWord) {
+          speak(currentTargetWord.text);
         }
       });
 
-      // 重置按钮
+      // ============================================================
+      // 重置游戏
+      // ============================================================
+      function resetGame() {
+        level = 1;
+        isLocked = false;
+        window.speechSynthesis?.cancel();
+        generateNewRound();
+      }
+
       resetBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         resetGame();
       });
 
-      // 页面点击初始化语音 (确保语音在用户交互后可播放)
-      document.addEventListener('click', () => {
-        initVoices();
-      }, { once: true });
-
-      // 兼容语音列表加载
-      if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = () => {
-          // 语音列表更新
-        };
-      }
-
-      // ---------- 启动游戏 ----------
-      resetGame();
-
-      // 对于复习模式下的选项点击，我们不想自动读，但是已经通过handleOptionClick区分了。
-      // 注意：复习模式下，渲染选项时添加了 'review-mode' 类，不影响功能。
-      // 另外，复习模式下，点击喇叭依旧可以读。
-
-      // 如果页面加载时没有用户交互，语音可能被阻止。所以添加一个入口提示？
-      // 但resetGame中调用了speakText，如果没有用户交互会被浏览器阻止。
-      // 改进：可以在页面顶部显示一个“点击开始”的浮层。但为了简洁，我们通过第一次点击页面任意位置来激活语音。
-      // 并且将初始朗读延迟到第一次用户交互。
-      // 简单处理：修改resetGame，不立即朗读，而是等待用户第一次点击。
-      // 但是用户点击选项时会触发朗读，也算交互。
-      // 但体验上，孩子第一次打开可能没声音。所以加一个提示。
-      // 稍微调整：在resetGame后，如果浏览器不支持自动播放，会静音。我们在soundHint上显示文字不变。
-      // 改用：第一次点击任何地方，朗读当前字。
-      let firstInteraction = false;
-      const firstInteractionHandler = () => {
-        if (!firstInteraction && currentItem) {
-          firstInteraction = true;
-          speakText(currentItem.text);
-        }
-        document.removeEventListener('touchstart', firstInteractionHandler);
-        document.removeEventListener('click', firstInteractionHandler);
-      };
-      document.addEventListener('touchstart', firstInteractionHandler);
-      document.addEventListener('click', firstInteractionHandler);
-
-      // 但是如果我们重置游戏，可能没有朗读。可以再次触发？不用，重置后喇叭可以点。
-      // 让重置后也朗读一次，通过用户点击重置按钮，本身就是交互，可以直接朗读。
-      // 修改resetGame，增加朗读（在重置后，由于有用户交互）
-      const originalReset = resetGame;
-      resetGame = function() {
-        originalReset.call(this);
-        // 重置后如果是用户点击重置按钮触发的，则朗读
-        if (window.speechSynthesis) {
-          setTimeout(() => {
-            if (currentItem) speakText(currentItem.text);
-          }, 150);
-        }
-      };
-      // 绑定重置按钮使用新的resetGame
-      resetBtn.onclick = (e) => {
-        e.stopPropagation();
-        resetGame();
-      };
-
-      // 覆盖重置按钮的监听（避免重复）
-      // 已经通过resetBtn.addEventListener绑定了，但resetGame被覆盖了，没问题。但是之前绑定的函数引用的是旧的resetGame？不，函数声明提升，但是resetGame变量被重新赋值，之前的addEventListener绑定的还是旧函数。
-      // 所以需要移除之前的监听。简单粗暴：重新绑定。
-      // 清除所有监听比较麻烦，我们重新获取元素并绑定。
-      const newResetBtn = document.getElementById('resetBtn');
-      const newResetBtnClone = newResetBtn.cloneNode(true);
-      newResetBtn.parentNode.replaceChild(newResetBtnClone, newResetBtn);
-      newResetBtnClone.addEventListener('click', (e) => {
-        e.stopPropagation();
-        resetGame();
-      });
-      // 重新获取resetBtn变量
-      window.resetBtn = newResetBtnClone;
-
-      // 重新绑定喇叭（也克隆一下避免重复）
-      const newSoundHint = document.getElementById('soundHint');
-      const newSoundClone = newSoundHint.cloneNode(true);
-      newSoundHint.parentNode.replaceChild(newSoundClone, newSoundHint);
-      newSoundClone.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (currentItem) speakText(currentItem.text, true);
-      });
-      window.soundHint = newSoundClone;
-
-      // 由于重置了DOM，需要更新全局变量引用
-      // 重新获取characterShow等不变，但soundHint变了
-      // 我们在renderGame中使用的soundHint是旧的，但我们已经替换了DOM，需要更新引用。
-      // 简单处理：用document.getElementById每次获取
-      // 修改renderGame内部，使用document.getElementById实时获取。但为了简单，我们重新定义renderGame使用新变量。
-      // 为了方便，我们放弃上面的克隆方法，重新整理代码。
-      // 下面重新整理：我们重新初始化，避免混乱。
-      // 其实不用这么复杂，使用事件委托或者保持原样就可以。
-      // 重写一下事件绑定部分：因为上面代码已经执行了resetGame()，现在重新整理。
-
-      // 为了确保代码清晰，我将在最后重写事件绑定。
-      // 移除之前的绑定，重新初始化。
-
-      // 直接重新整理整个脚本的末尾部分。
-      // 我将在下面重写整个初始化逻辑，确保干净。
-      // 但为了不重写整个IIFE，我在这里进行清理。
-
-      // 删除之前的resetGame, soundHint的监听，重新绑定。
-      // 但是函数内部引用还是旧的，那就把函数重新定义。
-
-      // 算了，我直接把上面所有代码重新整理，放在一个干净的环境里。
-      // 因为已经写了很多，我重新写一个清晰的版本在下面，替换掉之前的逻辑。
-      // 由于是在同一个script标签内，我清空所有并重写。
-
-      // 为了避免混乱，我直接重新初始化整个页面逻辑。
-      // 清除所有定时器，取消语音，清空DOM，然后重新执行。
-
-      // 最简单的方式：把上面整段代码用新的替换掉。
-      // 我将在下面写一个全新的、干净的实现，从头开始。
-      // 请忽略上面所有的逻辑，以以下代码为准。
-
-      // 重新开始：清理全局
-      window.speechSynthesis?.cancel();
-      
-      // 重置所有变量和DOM内容
-      // 这里不再使用上面的代码，而是全新的。
-
-      // 由于代码执行顺序，上面已经运行了一遍，有残留。我们简单清除。
-      // 但我们可以直接重新定义函数和变量，覆盖掉。
-
-      // 用新的变量名避免冲突。
-      // 重新定义常量
-      const DATA = [
-        { text: '大', type: 'char' },
-        { text: '小', type: 'char' },
-        { text: '人', type: 'char' },
-        { text: '山', type: 'char' },
-        { text: '水', type: 'char' },
-        { text: '火', type: 'char' },
-        { text: '日', type: 'char' },
-        { text: '月', type: 'char' },
-        { text: '口', type: 'char' },
-        { text: '手', type: 'char' },
-        { text: '猫', type: 'char' },
-        { text: '狗', type: 'char' },
-        { text: '花', type: 'char' },
-        { text: '鸟', type: 'char' },
-        { text: '天', type: 'char' },
-        { text: '上', type: 'char' },
-        { text: '我', type: 'char' },
-        { text: '你', type: 'char' },
-        { text: '好', type: 'char' },
-        { text: '大 小', type: 'sentence' },
-        { text: '太 阳', type: 'sentence' },
-        { text: '月 亮', type: 'sentence' },
-        { text: '小 猫', type: 'sentence' },
-        { text: '我 爱 你', type: 'sentence' },
-        { text: '一 二 三', type: 'sentence' },
-      ];
-
-      // 新状态
-      let curItem = null;
-      let curOptions = [];
-      let reviewMode = false;
-      let learnedList = [];
-      let reviewPool2 = [];
-      let level = 1;
-
-      // DOM元素重新获取
-      const charShow = document.getElementById('characterShow');
-      const soundHintEl = document.getElementById('soundHint');
-      const optionsGridEl = document.getElementById('optionsGrid');
-      const progressBadgeEl = document.getElementById('progressBadge');
-      const starDisplayEl = document.getElementById('starDisplay');
-      const modeIndicatorEl = document.getElementById('modeIndicator');
-      const resetBtnEl = document.getElementById('resetBtn');
-
-      // 辅助函数
-      function shuffle(arr) {
-        for (let i = arr.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-        }
-        return arr;
-      }
-
-      function speak(text) {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-        const utt = new SpeechSynthesisUtterance(text);
-        utt.lang = 'zh-CN';
-        utt.rate = 0.9;
-        utt.pitch = 1.2;
-        const voices = window.speechSynthesis.getVoices();
-        const zh = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
-        if (zh) utt.voice = zh;
-        window.speechSynthesis.speak(utt);
-      }
-
-      // 生成选项
-      function makeOptions(item) {
-        const correct = item.text;
-        const others = DATA.filter(d => d.text !== correct);
-        const shuffled = shuffle([...others]);
-        const distractors = shuffled.slice(0, 3).map(d => d.text);
-        let opts = [correct, ...distractors];
-        while (opts.length < 4) {
-          const extra = DATA[Math.floor(Math.random() * DATA.length)].text;
-          if (!opts.includes(extra)) opts.push(extra);
-        }
-        return shuffle(opts);
-      }
-
-      // 渲染
-      function render() {
-        if (!curItem) return;
-        charShow.textContent = curItem.text;
-        if (curItem.type === 'sentence') {
-          charShow.classList.add('sentence');
-        } else {
-          charShow.classList.remove('sentence');
-        }
-
-        // 选项按钮
-        optionsGridEl.innerHTML = '';
-        curOptions.forEach(txt => {
-          const btn = document.createElement('div');
-          btn.classList.add('option-btn');
-          if (reviewMode) btn.classList.add('review-mode');
-          btn.textContent = txt;
-          btn.dataset.text = txt;
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            onOptionClick(txt, btn);
-          });
-          optionsGridEl.appendChild(btn);
-        });
-
-        // 模式指示
-        modeIndicatorEl.textContent = reviewMode ? '📖 复习认字 (点字不读)' : '🔊 听音选字';
-
-        // 进度
-        progressBadgeEl.textContent = `第 ${level} 关`;
-        const starCount = Math.min(5, Math.floor(level / 2) + 1);
-        starDisplayEl.textContent = '⭐️'.repeat(starCount);
-
-        // 非复习模式自动朗读
-        if (!reviewMode) {
-          setTimeout(() => speak(curItem.text), 80);
-        }
-      }
-
-      // 选项点击处理
-      function onOptionClick(selected, btn) {
-        if (!curItem) return;
-
-        // 学习模式下，点击选项朗读其内容（无论对错）
-        if (!reviewMode) {
-          speak(selected);
-        }
-
-        if (selected === curItem.text) {
-          // 正确
-          // 禁用按钮
-          document.querySelectorAll('.option-btn').forEach(b => {
-            b.style.pointerEvents = 'none';
-            b.style.opacity = '0.7';
-          });
-
-          // 学习模式下记录已学
-          if (!reviewMode) {
-            if (!learnedList.some(i => i.text === curItem.text)) {
-              learnedList.push(curItem);
-              reviewPool2.push(curItem);
-            }
-          }
-
-          level++;
-
-          setTimeout(() => {
-            // 决定下一步
-            const learnedCount = learnedList.length;
-
-            // 判断是否进入复习模式
-            if (!reviewMode && learnedCount > 0 && learnedCount % 3 === 0 && reviewPool2.length > 0) {
-              // 进入复习模式
-              reviewMode = true;
-              const revItem = reviewPool2[Math.floor(Math.random() * reviewPool2.length)];
-              curItem = revItem;
-              curOptions = makeOptions(curItem);
-              render();
-            } else {
-              // 如果当前是复习模式且答对了，有几率继续复习或回到学习
-              if (reviewMode) {
-                // 30%概率继续复习
-                const continueRev = Math.random() < 0.3 && reviewPool2.length > 1;
-                if (continueRev) {
-                  const otherReviews = reviewPool2.filter(i => i.text !== curItem.text);
-                  if (otherReviews.length > 0) {
-                    curItem = otherReviews[Math.floor(Math.random() * otherReviews.length)];
-                    curOptions = makeOptions(curItem);
-                    render();
-                    // 恢复按钮可点
-                    document.querySelectorAll('.option-btn').forEach(b => {
-                      b.style.pointerEvents = 'auto';
-                      b.style.opacity = '1';
-                    });
-                    return;
-                  }
-                }
-                reviewMode = false;
-              }
-
-              // 学习模式选新字
-              const learnedTexts = learnedList.map(i => i.text);
-              const unlearned = DATA.filter(d => !learnedTexts.includes(d.text));
-              if (unlearned.length > 0) {
-                curItem = unlearned[Math.floor(Math.random() * unlearned.length)];
-              } else {
-                curItem = DATA[Math.floor(Math.random() * DATA.length)];
-              }
-              curOptions = makeOptions(curItem);
-              render();
-            }
-
-            // 恢复按钮可点
-            document.querySelectorAll('.option-btn').forEach(b => {
-              b.style.pointerEvents = 'auto';
-              b.style.opacity = '1';
-            });
-          }, 500);
-
-        } else {
-          // 选错
-          if (navigator.vibrate) navigator.vibrate(200);
-          btn.style.transform = 'translateY(5px)';
-          btn.style.boxShadow = '0 3px 0 #dba56b, 0 6px 12px rgba(0, 0, 0, 0.1)';
-          setTimeout(() => {
-            btn.style.transform = '';
-            btn.style.boxShadow = '';
-          }, 150);
-        }
-      }
-
-      // 重置
-      function reset() {
-        window.speechSynthesis?.cancel();
-        learnedList = [];
-        reviewPool2 = [];
-        level = 1;
-        reviewMode = false;
-
-        curItem = DATA[Math.floor(Math.random() * DATA.length)];
-        curOptions = makeOptions(curItem);
-        render();
-
-        // 恢复按钮可点
-        document.querySelectorAll('.option-btn').forEach(b => {
-          b.style.pointerEvents = 'auto';
-          b.style.opacity = '1';
-        });
-
-        // 主动朗读一次 (因为重置是用户交互)
-        setTimeout(() => speak(curItem.text), 150);
-      }
-
-      // 绑定事件 (重新绑定，避免重复)
-      // 移除旧监听通过克隆替换
-      const oldSound = soundHintEl;
-      const newSound = oldSound.cloneNode(true);
-      oldSound.parentNode.replaceChild(newSound, oldSound);
-      newSound.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (curItem) speak(curItem.text);
-      });
-
-      const oldReset = resetBtnEl;
-      const newReset = oldReset.cloneNode(true);
-      oldReset.parentNode.replaceChild(newReset, oldReset);
-      newReset.addEventListener('click', (e) => {
-        e.stopPropagation();
-        reset();
-      });
-
-      // 更新全局DOM引用
-      // 重新获取soundHint和resetBtn (用于其他可能引用)
-      // 启动
-      reset();
-
-      // 首次交互语音激活
+      // 初始化首次点击加载语音包
       document.body.addEventListener('touchstart', function once() {
         if (window.speechSynthesis) window.speechSynthesis.getVoices();
         document.body.removeEventListener('touchstart', once);
@@ -1045,6 +371,12 @@
         if (window.speechSynthesis) window.speechSynthesis.getVoices();
         document.body.removeEventListener('click', once);
       }, { once: true });
+
+      // ============================================================
+      // 启动游戏
+      // ============================================================
+      // 初始化第一题（注意：部分浏览器限制自动播放，可能需要用户点一下屏幕才会朗读）
+      generateNewRound();
 
     })();
   </script>
