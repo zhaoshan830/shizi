@@ -36,47 +36,48 @@
       position: relative;
     }
 
-    /* 声音激活遮罩层 */
+    /* 声音激活遮罩层 (必须点一下才能出声) */
     #audio-mask {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(255, 240, 220, 0.95);
+      background: rgba(255, 248, 235, 0.98);
       z-index: 9999;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
+      text-align: center;
+      padding: 20px;
     }
     
     #audio-mask h2 {
       color: #d14b4b;
-      font-size: 2rem;
-      margin-bottom: 20px;
-      animation: pulse 1.5s infinite;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+    
+    #audio-mask p {
+      color: #666;
+      font-size: 1.1rem;
+      margin-bottom: 30px;
     }
 
     #audio-mask button {
       background: #ff9f43;
       color: white;
       border: none;
-      padding: 16px 40px;
-      font-size: 1.5rem;
+      padding: 18px 45px;
+      font-size: 1.6rem;
       border-radius: 50px;
       font-weight: bold;
       box-shadow: 0 8px 0 #cc7a2c;
       cursor: pointer;
+      transition: all 0.1s;
     }
     
     #audio-mask button:active {
       transform: translateY(6px);
       box-shadow: 0 2px 0 #cc7a2c;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
     }
 
     .header-area {
@@ -207,9 +208,10 @@
 </head>
 <body>
 
-  <!-- 关键：声音激活遮罩层，必须点一下才能出声 -->
+  <!-- 必须点击的启动遮罩 -->
   <div id="audio-mask">
-    <h2>👆 请点击下方按钮开启声音</h2>
+    <h2>👆 请点击开启声音</h2>
+    <p>点击后才会听到标准的读字哦</p>
     <button id="start-btn">点击开始游戏</button>
   </div>
 
@@ -232,136 +234,13 @@
   <script>
     (function() {
       // 生字库
-    const GRADE_DATA = [
-  { text: '一' }, { text: '二' }, { text: '三' }, { text: '四' }, { text: '五' },
-  { text: '六' }, { text: '七' }, { text: '八' }, { text: '九' }, { text: '十' },
-  { text: '百' }, { text: '千' }, { text: '万' }, { text: '亿' }, { text: '零' },
-  { text: '人' }, { text: '口' }, { text: '手' }, { text: '足' }, { text: '目' },
-  { text: '耳' }, { text: '鼻' }, { text: '舌' }, { text: '牙' }, { text: '心' },
-  { text: '头' }, { text: '发' }, { text: '身' }, { text: '体' }, { text: '力' },
-  { text: '大' }, { text: '小' }, { text: '多' }, { text: '少' }, { text: '高' },
-  { text: '低' }, { text: '长' }, { text: '短' }, { text: '上' }, { text: '下' },
-  { text: '左' }, { text: '右' }, { text: '前' }, { text: '后' }, { text: '里' },
-  { text: '外' }, { text: '中' }, { text: '东' }, { text: '西' }, { text: '南' },
-  { text: '北' }, { text: '天' }, { text: '地' }, { text: '日' }, { text: '月' },
-  { text: '星' }, { text: '云' }, { text: '风' }, { text: '雨' }, { text: '雪' },
-  { text: '雷' }, { text: '电' }, { text: '山' }, { text: '水' }, { text: '火' },
-  { text: '土' }, { text: '石' }, { text: '木' }, { text: '金' }, { text: '田' },
-  { text: '河' }, { text: '海' }, { text: '湖' }, { text: '江' }, { text: '花' },
-  { text: '草' }, { text: '树' }, { text: '林' }, { text: '叶' }, { text: '果' },
-  { text: '米' }, { text: '饭' }, { text: '菜' }, { text: '肉' }, { text: '鱼' },
-  { text: '鸟' }, { text: '虫' }, { text: '马' }, { text: '牛' }, { text: '羊' },
-  { text: '猫' }, { text: '狗' }, { text: '猪' }, { text: '鸡' }, { text: '鸭' },
-  { text: '兔' }, { text: '虎' }, { text: '龙' }, { text: '蛇' }, { text: '象' },
-  { text: '我' }, { text: '你' }, { text: '他' }, { text: '她' }, { text: '它' },
-  { text: '们' }, { text: '自' }, { text: '己' }, { text: '家' }, { text: '人' },
-  { text: '爸' }, { text: '妈' }, { text: '爷' }, { text: '奶' }, { text: '哥' },
-  { text: '姐' }, { text: '弟' }, { text: '妹' }, { text: '儿' }, { text: '女' },
-  { text: '男' }, { text: '老' }, { text: '少' }, { text: '朋' }, { text: '友' },
-  { text: '好' }, { text: '坏' }, { text: '新' }, { text: '旧' }, { text: '快' },
-  { text: '慢' }, { text: '冷' }, { text: '热' }, { text: '早' }, { text: '晚' },
-  { text: '明' }, { text: '暗' }, { text: '白' }, { text: '黑' }, { text: '红' },
-  { text: '黄' }, { text: '蓝' }, { text: '绿' }, { text: '青' }, { text: '紫' },
-  { text: '走' }, { text: '跑' }, { text: '跳' }, { text: '飞' }, { text: '看' },
-  { text: '听' }, { text: '说' }, { text: '读' }, { text: '写' }, { text: '画' },
-  { text: '吃' }, { text: '喝' }, { text: '睡' }, { text: '起' }, { text: '坐' },
-  { text: '站' }, { text: '拿' }, { text: '放' }, { text: '开' }, { text: '关' },
-  { text: '来' }, { text: '去' }, { text: '回' }, { text: '进' }, { text: '出' },
-  { text: '买' }, { text: '卖' }, { text: '给' }, { text: '要' }, { text: '用' },
-  { text: '做' }, { text: '学' }, { text: '问' }, { text: '答' }, { text: '想' },
-  { text: '知' }, { text: '道' }, { text: '会' }, { text: '能' }, { text: '可' },
-  { text: '爱' }, { text: '喜' }, { text: '笑' }, { text: '哭' }, { text: '叫' },
-  { text: '唱' }, { text: '玩' }, { text: '工' }, { text: '作' }, { text: '事' },
-  { text: '物' }, { text: '东' }, { text: '西' }, { text: '时' }, { text: '间' },
-  { text: '年' }, { text: '月' }, { text: '日' }, { text: '春' }, { text: '夏' },
-  { text: '秋' }, { text: '冬' }, { text: '今' }, { text: '明' }, { text: '昨' },
-  { text: '午' }, { text: '夜' }, { text: '分' }, { text: '秒' }, { text: '点' },
-  { text: '书' }, { text: '本' }, { text: '笔' }, { text: '纸' }, { text: '字' },
-  { text: '词' }, { text: '句' }, { text: '文' }, { text: '数' }, { text: '名' },
-  { text: '车' }, { text: '船' }, { text: '路' }, { text: '桥' }, { text: '门' },
-  { text: '窗' }, { text: '房' }, { text: '屋' }, { text: '桌' }, { text: '椅' },
-  { text: '床' }, { text: '灯' }, { text: '衣' }, { text: '帽' }, { text: '鞋' },
-  { text: '手' }, { text: '口' }, { text: '水' }, { text: '饭' }, { text: '茶' },
-  { text: '果' }, { text: '瓜' }, { text: '豆' }, { text: '叶' }, { text: '根' },
-  { text: '国' }, { text: '民' }, { text: '城' }, { text: '村' }, { text: '路' },
-  { text: '街' }, { text: '店' }, { text: '医' }, { text: '院' }, { text: '校' },
-  { text: '老' }, { text: '师' }, { text: '生' }, { text: '同' }, { text: '学' },
-  { text: '先' }, { text: '后' }, { text: '内' }, { text: '外' }, { text: '真' },
-  { text: '假' }, { text: '对' }, { text: '错' }, { text: '是' }, { text: '非' },
-  { text: '有' }, { text: '无' }, { text: '全' }, { text: '半' }, { text: '空' },
-  { text: '满' }, { text: '轻' }, { text: '重' }, { text: '远' }, { text: '近' },
-  { text: '深' }, { text: '浅' }, { text: '宽' }, { text: '窄' }, { text: '厚' },
-  { text: '薄' }, { text: '软' }, { text: '硬' }, { text: '甜' }, { text: '苦' },
-  { text: '酸' }, { text: '辣' }, { text: '香' }, { text: '臭' }, { text: '美' },
-  { text: '丑' }, { text: '胖' }, { text: '瘦' }, { text: '病' }, { text: '药' },
-  { text: '医' }, { text: '生' }, { text: '死' }, { text: '活' }, { text: '安' },
-  { text: '全' }, { text: '危' }, { text: '险' }, { text: '平' }, { text: '静' },
-  { text: '动' }, { text: '停' }, { text: '走' }, { text: '回' }, { text: '转' },
-  { text: '推' }, { text: '拉' }, { text: '提' }, { text: '抬' }, { text: '搬' },
-  { text: '拿' }, { text: '握' }, { text: '摸' }, { text: '打' }, { text: '拍' },
-  { text: '跳' }, { text: '跑' }, { text: '走' }, { text: '飞' }, { text: '游' },
-  { text: '爬' }, { text: '站' }, { text: '坐' }, { text: '躺' }, { text: '睡' },
-  { text: '醒' }, { text: '吃' }, { text: '喝' }, { text: '咬' }, { text: '吞' },
-  { text: '说' }, { text: '讲' }, { text: '问' }, { text: '答' }, { text: '读' },
-  { text: '写' }, { text: '画' }, { text: '唱' }, { text: '跳' }, { text: '玩' },
-  { text: '笑' }, { text: '哭' }, { text: '叫' }, { text: '喊' }, { text: '听' },
-  { text: '看' }, { text: '见' }, { text: '找' }, { text: '给' }, { text: '送' },
-  { text: '收' }, { text: '放' }, { text: '开' }, { text: '关' }, { text: '锁' },
-  { text: '买' }, { text: '卖' }, { text: '钱' }, { text: '元' }, { text: '角' },
-  { text: '分' }, { text: '贵' }, { text: '便' }, { text: '宜' }, { text: '多' },
-  { text: '少' }, { text: '够' }, { text: '缺' }, { text: '剩' }, { text: '完' },
-  { text: '始' }, { text: '终' }, { text: '先' }, { text: '后' }, { text: '今' },
-  { text: '古' }, { text: '老' }, { text: '新' }, { text: '旧' }, { text: '快' },
-  { text: '慢' }, { text: '早' }, { text: '晚' }, { text: '日' }, { text: '夜' },
-  { text: '春' }, { text: '夏' }, { text: '秋' }, { text: '冬' }, { text: '风' },
-  { text: '雨' }, { text: '雪' }, { text: '云' }, { text: '电' }, { text: '雷' },
-  { text: '山' }, { text: '水' }, { text: '河' }, { text: '海' }, { text: '湖' },
-  { text: '江' }, { text: '田' }, { text: '土' }, { text: '石' }, { text: '沙' },
-  { text: '花' }, { text: '草' }, { text: '树' }, { text: '林' }, { text: '叶' },
-  { text: '果' }, { text: '米' }, { text: '麦' }, { text: '豆' }, { text: '菜' },
-  { text: '肉' }, { text: '鱼' }, { text: '蛋' }, { text: '奶' }, { text: '茶' },
-  { text: '酒' }, { text: '油' }, { text: '盐' }, { text: '糖' }, { text: '醋' },
-  { text: '猫' }, { text: '狗' }, { text: '猪' }, { text: '牛' }, { text: '羊' },
-  { text: '马' }, { text: '鸡' }, { text: '鸭' }, { text: '鹅' }, { text: '鸟' },
-  { text: '虫' }, { text: '鱼' }, { text: '虾' }, { text: '蟹' }, { text: '兔' },
-  { text: '虎' }, { text: '龙' }, { text: '蛇' }, { text: '猴' }, { text: '象' },
-  { text: '一' }, { text: '二' }, { text: '三' }, { text: '四' }, { text: '五' },
-  { text: '六' }, { text: '七' }, { text: '八' }, { text: '九' }, { text: '十' },
-  { text: '百' }, { text: '千' }, { text: '万' }, { text: '半' }, { text: '双' },
-  { text: '个' }, { text: '只' }, { text: '条' }, { text: '张' }, { text: '片' },
-  { text: '块' }, { text: '本' }, { text: '支' }, { text: '把' }, { text: '件' },
-  { text: '米' }, { text: '尺' }, { text: '斤' }, { text: '两' }, { text: '克' },
-  { text: '我' }, { text: '你' }, { text: '他' }, { text: '她' }, { text: '它' },
-  { text: '们' }, { text: '谁' }, { text: '什' }, { text: '么' }, { text: '哪' },
-  { text: '这' }, { text: '那' }, { text: '些' }, { text: '每' }, { text: '各' },
-  { text: '的' }, { text: '地' }, { text: '得' }, { text: '了' }, { text: '着' },
-  { text: '过' }, { text: '吗' }, { text: '呢' }, { text: '吧' }, { text: '啊' },
-  { text: '和' }, { text: '与' }, { text: '或' }, { text: '但' }, { text: '而' },
-  { text: '因' }, { text: '为' }, { text: '所' }, { text: '以' }, { text: '就' },
-  { text: '也' }, { text: '都' }, { text: '还' }, { text: '又' }, { text: '再' },
-  { text: '很' }, { text: '太' }, { text: '最' }, { text: '更' }, { text: '非' },
-  { text: '常' }, { text: '真' }, { text: '正' }, { text: '刚' }, { text: '才' },
-  { text: '已' }, { text: '经' }, { text: '曾' }, { text: '将' }, { text: '要' },
-  { text: '会' }, { text: '能' }, { text: '可' }, { text: '应' }, { text: '该' },
-  { text: '必' }, { text: '须' }, { text: '想' }, { text: '愿' }, { text: '敢' },
-  { text: '爱' }, { text: '恨' }, { text: '怕' }, { text: '急' }, { text: '慢' },
-  { text: '高' }, { text: '兴' }, { text: '快' }, { text: '乐' }, { text: '难' },
-  { text: '过' }, { text: '伤' }, { text: '心' }, { text: '生' }, { text: '气' },
-  { text: '安' }, { text: '静' }, { text: '平' }, { text: '和' }, { text: '美' },
-  { text: '好' }, { text: '善' }, { text: '恶' }, { text: '真' }, { text: '假' },
-  { text: '对' }, { text: '错' }, { text: '是' }, { text: '非' }, { text: '正' },
-  { text: '反' }, { text: '进' }, { text: '退' }, { text: '上' }, { text: '下' },
-  { text: '来' }, { text: '去' }, { text: '回' }, { text: '转' }, { text: '停' },
-  { text: '走' }, { text: '跑' }, { text: '飞' }, { text: '游' }, { text: '爬' },
-  { text: '站' }, { text: '坐' }, { text: '躺' }, { text: '睡' }, { text: '醒' },
-  { text: '吃' }, { text: '喝' }, { text: '穿' }, { text: '脱' }, { text: '洗' },
-  { text: '刷' }, { text: '擦' }, { text: '扫' }, { text: '搬' }, { text: '抬' },
-  { text: '推' }, { text: '拉' }, { text: '提' }, { text: '放' }, { text: '拿' },
-  { text: '握' }, { text: '摸' }, { text: '打' }, { text: '拍' }, { text: '抱' },
-  { text: '背' }, { text: '扛' }, { text: '挑' }, { text: '选' }, { text: '换' },
-  { text: '买' }, { text: '卖' }, { text: '借' }, { text: '还' }, { text: '送' },
-  { text: '收' }, { text: '给' }, { text: '取' }, { text: '存' }, { text: '用' }
-];
+      const GRADE_DATA = [
+        { text: '大' }, { text: '小' }, { text: '人' }, { text: '山' }, { text: '水' }, 
+        { text: '火' }, { text: '日' }, { text: '月' }, { text: '口' }, { text: '手' }, 
+        { text: '猫' }, { text: '狗' }, { text: '花' }, { text: '鸟' }, { text: '天' }, 
+        { text: '上' }, { text: '下' }, { text: '我' }, { text: '你' }, { text: '好' },
+        { text: '太' }, { text: '早' }, { text: '牙' }, { text: '木' }, { text: '马' }
+      ];
 
       const uniqueMap = new Map();
       GRADE_DATA.forEach(item => uniqueMap.set(item.text, item));
@@ -371,36 +250,34 @@
       let currentGridWords = [];
       let level = 1;
       let isLocked = false;
-      let isAudioReady = false; // 声音是否已激活
+      let isAudioReady = false;
 
       const gridContainer = document.getElementById('gridContainer');
       const playBtn = document.getElementById('playBtn');
       const progressBadge = document.getElementById('progressBadge');
       const resetBtn = document.getElementById('resetBtn');
-      
       const audioMask = document.getElementById('audio-mask');
       const startBtn = document.getElementById('start-btn');
 
-      // 语音引擎核心逻辑
+      // 核心发音逻辑：极慢语速 + 儿童音调
       function speak(text) {
         if (!isAudioReady) return;
-        if (!window.speechSynthesis) {
-          alert('您的浏览器不支持语音朗读，请使用 Chrome、Safari 或 Edge 浏览器打开。');
-          return;
-        }
+        if (!window.speechSynthesis) return;
         
-        // 有些手机浏览器必须要在用户交互后且不打断的情况下才发声
         window.speechSynthesis.cancel(); 
         
         const utterance = new SpeechSynthesisUtterance();
         utterance.text = text;
         utterance.lang = 'zh-CN';
-        utterance.rate = 0.85; 
-        utterance.pitch = 1.1;
+        
+        // 【关键调整】
+        utterance.rate = 0.6;  // 0.6倍速，非常慢，适合四岁小孩
+        utterance.pitch = 1.2; // 1.2倍音调，像女老师的声音
+        utterance.volume = 1.0;
         
         const voices = window.speechSynthesis.getVoices();
-        // 尽量找中文语音
-        const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn') || v.name.includes('Chinese'));
+        // 尽量找一个标准的中文女声
+        const zhVoice = voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
         if (zhVoice) {
           utterance.voice = zhVoice;
         }
@@ -408,7 +285,6 @@
         window.speechSynthesis.speak(utterance);
       }
 
-      // 生成新题目
       function generateNewRound() {
         if (isLocked) return;
         
@@ -447,7 +323,7 @@
         if (clickedText === currentTargetWord.text) {
           isLocked = true;
           btnElement.classList.add('correct');
-          speak(clickedText);
+          speak(clickedText); // 点对了再读一遍，慢速加深记忆
           
           setTimeout(() => {
             level++;
@@ -456,7 +332,7 @@
               b.classList.remove('correct', 'wrong');
             });
             generateNewRound();
-          }, 1000);
+          }, 1200); // 稍微拉长点时间，等语音读完
         } else {
           btnElement.classList.add('wrong');
           if (navigator.vibrate) navigator.vibrate(200);
@@ -483,35 +359,27 @@
         resetGame();
       });
 
-      // ============================================================
-      // 核心突破：点击开始按钮，强行激活手机的声音权限
-      // ============================================================
+      // 点击开始，强行激活手机的声音权限
       startBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         
-        // 1. 预加载语音列表
         if (window.speechSynthesis) {
           window.speechSynthesis.getVoices();
-          // 2. 随便播报一个空字符或很短的声音，把手机的音频通道“骗”开
-          const u = new SpeechSynthesisUtterance(' ');
-          u.volume = 0.1; 
+          // 播报一个很轻的“大”字，用来彻底唤醒手机音频通道
+          const u = new SpeechSynthesisUtterance('大');
+          u.volume = 0.1;
+          u.rate = 1.0;
           window.speechSynthesis.speak(u);
         }
 
-        // 3. 标记声音已准备
         isAudioReady = true;
-
-        // 4. 隐藏遮罩层，开始游戏
         audioMask.style.display = 'none';
-        generateNewRound();
+        
+        // 稍微延迟一下再出题
+        setTimeout(() => {
+          generateNewRound();
+        }, 500);
       });
-
-      // 初始化语音列表加载
-      if (window.speechSynthesis) {
-        window.speechSynthesis.onvoiceschanged = () => {
-          // 语音包加载完成
-        };
-      }
 
     })();
   </script>
